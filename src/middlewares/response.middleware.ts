@@ -1,17 +1,17 @@
 export default {
   success(message: any, status?: number) {
     return {
-      error: '',
+      statusCode: status || 200,
       message,
-      status: status || 200,
+      error: '',
     };
   },
 
   error(message: any, status?: number) {
     return {
-      error: message,
+      statusCode: status || message.status || 500,
       message: '',
-      status: status || 500,
+      error: message,
     };
   },
 };

@@ -1,73 +1,69 @@
-import { Injectable } from '@nestjs/common';
-import { Product } from 'src/interfaces/product.interface';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Product } from 'src/interfaces/product.entity';
+
+import { CategoryService } from '../category/category.service';
+import { OrderService } from '../order/order.service';
+
+// importando la conexión a pg para hacer manejo y wea
+import { Client } from 'pg';
+
+import { CreateProductDto, UpdateProductDto } from 'src/dtos/product.dto';
 
 @Injectable()
 export class ProductService {
-  private products: Product[] = [
-    {
-      id: '1',
-      name: 'Product 1',
-      description: 'Description 1',
-      price: 100,
-      stock: 10,
-    },
-    {
-      id: '2',
-      name: 'Product 2',
-      description: 'Description 2',
-      price: 200,
-      image: 'image2.jpg',
-      stock: 20,
-    },
-  ];
-  private counterId = this.products.length;
+  constructor(
+    //private categoryService: CategoryService,
+    //private orderService: OrderService,
+    @Inject('PG') private readonly clientPg: Client,
+    @InjectRepository(Product) private productRepo: Repository<Product>,
+  ) {}
 
-  findAll() {
-    return this.products;
+  async findAll() {
+    return this.productRepo.find();
+    /*return new Promise((resolve, reject) => {
+      console.log('entro a findAll');
+      this.clientPg.query('SELECT * FROM product', (err, res) => {
+        if (err) reject(err);
+        else resolve(res.rows); // imprime los productos
+      });
+    });*/
   }
 
-  findOne(id: string) {
-    const product = this.products.find((product) => product.id === id);
-    if (!product) {
-      throw 'Product not found';
-    }
-    return product;
+  async findOne(id: number) {
+    const prod = await this.productRepo.findOne(id);
+    if (!prod) throw new NotFoundException(`Product #${id} not found`);
+    return prod;
+    /*return new Promise((resolve, reject) => {
+      console.log('entro a findAll');
+      this.clientPg.query(
+        `SELECT * FROM product WHERE product.id = ${id}`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res.rows); // imprime los productos
+        },
+      );
+    });*/
   }
 
-  create(payload: any) {
+  async create(payload: CreateProductDto) {
     // payload debe ser any debido a que no nos entregan el id
-    console.log(this.counterId);
-    this.counterId = this.counterId + 1;
-    console.log(this.counterId);
-    const newProduct: Product = {
-      id: this.counterId.toString(),
-      ...payload,
-    };
-    this.products.push(newProduct);
-    return newProduct;
+    const newProduct = this.productRepo.create(payload); // crea un producto
+    return this.productRepo.save(newProduct); // guarda el producto
   }
 
-  update(id: string, payload: any) {
-    const product = this.findOne(id);
-    if (!product) {
-      return null;
-    }
-    Object.assign(product, payload);
-    /*
-      this.products[this.products.indexOf(product)] = {
-        ...product,
-        ...payload,
-      };
-    */
-    return product;
+  // para hacer manejo mas global basta con update directo
+  async update(id: number, payload: UpdateProductDto) {
+    const productToUpdate: Partial<Product> = payload;
+    const product = await this.findOne(id);
+    this.productRepo.merge(product, productToUpdate);
+    this.productRepo.merge(product, { updatedAt: new Date() });
+    return this.productRepo.save(product);
   }
 
-  delete(id: string) {
-    const product = this.products.find((product) => product.id === id);
-    if (!product) {
-      return null;
-    }
-    this.products.splice(this.products.indexOf(product), 1);
-    return product;
+  delete(id: number) {
+    return this.productRepo.delete(id);
   }
 }

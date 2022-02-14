@@ -3,96 +3,82 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Post,
   Put,
+  //ParseIntPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 import { ProductService } from 'src/services/product/product.service';
+import { ParseIntPipe } from 'src/shared/parse-int.pipe';
+import { CreateProductDto, UpdateProductDto } from 'src/dtos/product.dto';
 
-import responseModule from 'src/modules/response.module';
+import responseModule from 'src/middlewares/response.middleware';
 
+@ApiTags('Product')
 @Controller('product')
 export class ProductController {
   constructor(private productService: ProductService) {}
 
   //getProducts(@Query('name') name = 'N/A', @Query('price') price = 0) {
   @Get('/all') // /product/all?name=mesa&price=999
+  @ApiOperation({ summary: 'Get all products' })
   getProducts() {
-    try {
-      const result = this.productService.findAll();
-      if (result) {
-        return responseModule.success(result, 200);
-      } else {
-        return responseModule.error('Not found', 400);
-      }
-    } catch (error) {
-      console.log(error);
-      return responseModule.error(error);
+    return this.productService.findAll();
+    const result = this.productService.findAll();
+    if (result) {
+      return responseModule.success(result, 200);
+    } else {
+      return responseModule.error('Error searching Products', 500);
     }
   }
 
   @Get('/:id')
-  @HttpCode(HttpStatus.ACCEPTED)
-  getProduct(@Param('id') productId: string) {
-    try {
-      const result = this.productService.findOne(productId);
-      if (result) {
-        return responseModule.success(result, 200);
-      } else {
-        return responseModule.error('Product Not found', 400);
-      }
-    } catch (error) {
-      console.log(error);
-      return responseModule.error(error, 400);
+  @ApiOperation({ summary: 'Get a product by id', description: 'asd' })
+  // ejemplo de uso de ParseIntPipe
+  getProduct(@Param('id', ParseIntPipe) productId: number) {
+    return this.productService.findOne(productId);
+    const result = this.productService.findOne(productId);
+    if (result) {
+      return responseModule.success(result, 200);
+    } else {
+      return responseModule.error('Error searching the Product', 500);
     }
+    //console.log('\u001b[' + 31 + 'm' + error + '\u001b[0m');
   }
 
   @Post()
-  createProduct(@Body() payload: any) {
-    try {
-      const result = this.productService.create(payload);
-      if (result) {
-        return responseModule.success(result, 201);
-      } else {
-        // echar ojo a class-validator para responder bien
-        return responseModule.error('Product Not created', 400);
-      }
-    } catch (error) {
-      console.log(error);
-      return responseModule.error(error);
+  createProduct(@Body() payload: CreateProductDto) {
+    return this.productService.create(payload);
+    const result = this.productService.create(payload);
+    if (result) {
+      return responseModule.success(result, 201);
+    } else {
+      // echar ojo a class-validator para responder bien
+      return responseModule.error('Error creating a Product', 500);
     }
   }
 
   @Put('/:id')
-  updateProduct(@Param('id') id: string, @Body() payload: any) {
-    try {
-      const result = this.productService.update(id, payload);
-      if (result) {
-        return responseModule.success(result, 200);
-      } else {
-        return responseModule.error('Product Not found', 400);
-      }
-    } catch (error) {
-      console.log(error);
-      return responseModule.error(error);
+  updateProduct(@Param('id') id: number, @Body() payload: UpdateProductDto) {
+    return this.productService.update(id, payload);
+    const result = this.productService.update(id, payload);
+    if (result) {
+      return responseModule.success(result, 200);
+    } else {
+      return responseModule.error('Error updating a Product', 500);
     }
   }
 
   @Delete('/:id')
-  deleteProduct(@Param('id') id: string) {
-    try {
-      const result = this.productService.delete(id);
-      if (result) {
-        return responseModule.success(result, 200);
-      } else {
-        return responseModule.error('Product Not found', 400);
-      }
-    } catch (error) {
-      console.log(error);
-      return responseModule.error(error);
+  deleteProduct(@Param('id') id: number) {
+    return this.productService.delete(id);
+    const result = this.productService.delete(id);
+    if (result) {
+      return responseModule.success(result, 200);
+    } else {
+      return responseModule.error('Error deleting a Product', 500);
     }
   }
 }

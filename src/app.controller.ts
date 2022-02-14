@@ -6,7 +6,20 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  async getHello(): Promise<string> {
+    const result = await this.appService.getHello();
+    console.log(result);
+    return await this.appService.getHello();
+  }
+
+  // nuevos endpoints
+  @Get('/test')
+  newEndpoint() {
+    return 'This is a new endpoint!';
+  }
+
+  @Get('/test/getproducts')
+  getProducts() {
+    return this.appService.getProducts();
   }
 }
