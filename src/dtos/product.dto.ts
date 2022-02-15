@@ -5,7 +5,7 @@ import {
   IsUrl,
   IsOptional,
   IsPositive,
-  IsDate,
+  IsArray,
 } from 'class-validator';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
 
@@ -43,29 +43,10 @@ export class CreateProductDto {
   @ApiProperty({ description: 'Product stock', example: 10 })
   readonly stock: number;
 
-  @IsOptional()
-  @IsDate()
-  @ApiProperty({
-    description: 'This variable is setted automatically, show created date',
-    default: new Date(),
-  })
-  readonly createdAt?: Date;
-
-  @IsOptional()
-  @IsDate()
-  @ApiProperty({
-    description: 'This variable is setted automatically, show updated date',
-    default: new Date(),
-  })
-  readonly updatedAt?: Date;
-
-  @IsNumber()
+  @IsArray()
   @IsNotEmpty()
-  readonly categoryId: number;
-
-  @IsOptional()
-  @IsNumber()
-  readonly orderId: number;
+  @ApiProperty()
+  readonly categoriesIds: number[];
 }
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}

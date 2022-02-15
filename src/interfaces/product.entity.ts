@@ -2,12 +2,13 @@ import {
   PrimaryGeneratedColumn,
   Column,
   Entity,
+  ManyToMany,
+  JoinTable, // este crea la tabla intermedia para no hacer directamente el N a N sino N:1 y 1:N
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
 } from 'typeorm';
 
-import { Category } from 'src/interfaces/category.entity';
+import { Category } from './category.entity';
 import { Order } from './order.entity';
 
 @Entity()
@@ -41,4 +42,12 @@ export class Product {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt?: Date;
+
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable() // solo debe ir en un lado de la relación
+  categories: Category[];
+
+  @ManyToMany(() => Order, (order) => order.products)
+  @JoinTable()
+  orders?: Order[];
 }

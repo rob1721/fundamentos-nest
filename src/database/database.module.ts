@@ -39,7 +39,7 @@ import config from '../config';
           username: pg_user,
           password: pg_pass,
           database: pg_db,
-          synchronize: false, // ojo aca: esto no debe estar en prod, esto genera error pq trata de crear nuevamente las tablas
+          synchronize: true, // ojo aca: esto no debe estar en prod, esto genera error pq trata de crear nuevamente las tablas
           autoLoadEntities: true,
         };
       },

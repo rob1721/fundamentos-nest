@@ -61,7 +61,10 @@ export class ProductController {
   }
 
   @Put('/:id')
-  updateProduct(@Param('id') id: number, @Body() payload: UpdateProductDto) {
+  updateProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateProductDto,
+  ) {
     return this.productService.update(id, payload);
     const result = this.productService.update(id, payload);
     if (result) {
@@ -72,7 +75,7 @@ export class ProductController {
   }
 
   @Delete('/:id')
-  deleteProduct(@Param('id') id: number) {
+  deleteProduct(@Param('id', ParseIntPipe) id: number) {
     return this.productService.delete(id);
     const result = this.productService.delete(id);
     if (result) {
@@ -80,6 +83,28 @@ export class ProductController {
     } else {
       return responseModule.error('Error deleting a Product', 500);
     }
+  }
+
+  @Put('/:id/category/:categoryId')
+  addCategory(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    return this.productService.addCategoryToProduct(id, categoryId);
+  }
+
+  @Delete('/:id/category/:categoryId')
+  deleteCategory(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    // sin el pipe, no reconoce el id como number, ojo acá
+    return this.productService.deleteCategoryByProduct(id, categoryId);
+  }
+
+  @Get('/test')
+  test() {
+    return this.productService.test();
   }
 }
 

@@ -6,22 +6,23 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { PartialType } from '@nestjs/swagger';
-import { Product } from 'src/interfaces/product.entity';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export class CreateOrderDto {
-  @IsNumber()
-  @IsNotEmpty()
-  @IsPositive()
-  readonly totalCost: number;
-
   @IsOptional()
   @IsString()
+  @ApiProperty()
   readonly status?: string;
 
   @IsNumber()
   @IsNotEmpty()
+  @ApiProperty({ description: 'Customer id', example: 1 })
   readonly customerId: number;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ApiProperty()
+  readonly productsIds: number[];
 }
 
 export class UpdateOrderDto extends PartialType(CreateOrderDto) {}

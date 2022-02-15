@@ -1,27 +1,39 @@
-import { Global, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Customer } from 'src/interfaces/customer.entity';
 
 import { CreateCustomerDto, UpdateCustomerDto } from 'src/dtos/customer.dto';
+import { ProductService } from '../product/product.service';
 
-import { OrderService } from 'src/services/order/order.service';
-
-@Global()
 @Injectable()
 export class CustomerService {
   constructor(
-    private orderService: OrderService,
+    private productService: ProductService,
     @InjectRepository(Customer) private customerRepo: Repository<Customer>,
   ) {}
 
   findAll() {
-    return this.customerRepo.find();
+    return this.customerRepo
+      .createQueryBuilder('customer')
+      .innerJoinAndSelect('customer.orders', 'order')
+      .innerJoinAndSelect('order.products', 'product')
+      .getMany();
+    return this.customerRepo.find({
+      relations: ['orders'],
+    });
   }
 
   async findOne(id: number) {
-    const customer = await this.customerRepo.findOne(id);
+    const customer = await this.customerRepo.findOne(id, {
+      relations: ['orders'],
+    });
     if (!customer) throw new NotFoundException(`Customer #${id} not found`);
     return customer;
   }
@@ -30,7 +42,6 @@ export class CustomerService {
     const customer = await this.findOne(id);
     return {
       customer,
-      orders: await this.orderService.findByCustomer(id),
     };
   }
 

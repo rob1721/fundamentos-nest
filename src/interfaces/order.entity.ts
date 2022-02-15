@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Customer } from './customer.entity';
 import { Product } from './product.entity';
@@ -20,6 +22,21 @@ export class Order {
   status?: string;
   // la order deberíatener a un user ademas del customer
 
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt?: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  updatedAt?: Date;
+
   @ManyToOne(() => Customer, (customer) => customer.orders)
   customer: Customer;
+
+  @ManyToMany(() => Product, (product) => product.orders)
+  products: Product[];
 }

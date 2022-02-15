@@ -7,15 +7,33 @@ import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { IndexModule } from './index.module';
 
 import { DatabaseModule } from './database/database.module';
 
 import { environments } from './environment';
 import config from './config';
 
+import { BrandService } from './services/brand/brand.service';
+import { CategoryService } from './services/category/category.service';
+import { CustomerService } from './services/customer/customer.service';
+import { OrderService } from './services/order/order.service';
+import { ProductService } from './services/product/product.service';
+import { UserService } from './services/user/user.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Category } from './interfaces/category.entity';
+import { Customer } from './interfaces/customer.entity';
+import { Order } from './interfaces/order.entity';
+import { Product } from './interfaces/product.entity';
+import { BrandController } from './controllers/brand/brand.controller';
+import { CategoryController } from './controllers/category/category.controller';
+import { CustomerController } from './controllers/customer/customer.controller';
+import { OrderController } from './controllers/order/order.controller';
+import { ProductController } from './controllers/product/product.controller';
+import { UserController } from './controllers/user/user.controller';
+
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Category, Customer, Order, Product]),
     ConfigModule.forRoot({
       envFilePath: environments[process.env.NODE_ENV] || '.env', // con esto se hace diferencia en los archivos de environment
       load: [config], // con esto se setean las variables que se pueden tomar y solamente estas, así no permitiendo errores humanos
@@ -31,10 +49,17 @@ import config from './config';
       }),
     }),
     HttpModule,
-    IndexModule,
     DatabaseModule,
   ],
-  controllers: [AppController],
+  controllers: [
+    AppController,
+    BrandController,
+    CategoryController,
+    CustomerController,
+    OrderController,
+    ProductController,
+    UserController,
+  ],
   providers: [
     AppService,
     /*{
@@ -63,6 +88,20 @@ import config from './config';
       },
       inject: [HttpService],
     },
+    BrandService,
+    CategoryService,
+    CustomerService,
+    OrderService,
+    ProductService,
+    UserService,
   ],
+  /*exports: [
+    BrandService,
+    CategoryService,
+    CustomerService,
+    OrderService,
+    ProductService,
+    UserService,
+  ],*/
 })
 export class AppModule {}
